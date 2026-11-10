@@ -21,6 +21,6 @@ public class WorkbaseAiServerApplication {
         Environment environment = event.getApplicationContext().getEnvironment();
         String[] activeProfiles = environment.getActiveProfiles();
         String[] profiles = activeProfiles.length == 0 ? environment.getDefaultProfiles() : activeProfiles;
-        System.out.println("workbaseAI-server 启动成功，当前环境：" + String.join(", ", profiles));
+        System.out.println("work-baseAI-server 启动成功，当前环境：" + String.join(", ", profiles));
     }
 }
