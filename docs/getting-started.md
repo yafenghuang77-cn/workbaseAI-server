@@ -42,6 +42,14 @@ workbaseAI-server 启动成功，当前环境：dev
 
 在运行服务的终端按 `Ctrl+C` 停止服务。
 
+## 接口文档与调试
+
+`dev` 和 `test` 环境启用 Knife4j。开发环境地址为 <http://localhost:8080/workbase/doc.html>，测试环境地址为 <http://localhost:8081/workbase/doc.html>。选择接口后可填写参数并发送请求，用户写入和删除操作会作用于当前环境的数据库。
+
+Springdoc 在 `/workbase/v3/api-docs` 提供 OpenAPI JSON，Knife4j 负责展示和调试。预发和生产环境默认关闭文档页面和 JSON 端点。 [Knife4j 版本说明](https://doc.xiaominfo.com/docs/quick-start/start-knife4j-version)
+
+项目自有接口各自使用独立的固定路径，同一模块可以共用路径前缀。参数通过查询字符串或请求体传递。
+
 ## 直连 MySQL
 
 应用通过 Spring JDBC 和 HikariCP 连接 MySQL。连接参数写在当前环境对应的 `application-<环境>.yaml` 的 `mysql` 配置块，`spring.datasource` 使用这些参数生成连接地址。当前 Connector/J 版本支持 MySQL Server 8.4 及以上。 [MySQL Connector/J 兼容性说明](https://dev.mysql.com/doc/connector-j/en/connector-j-versions.html)
@@ -73,6 +81,34 @@ workbaseAI-server 启动成功，当前环境：dev
 | `max-lifetime` | 1800000 | 连接在池中的最长生命周期，正在使用的连接归还后再回收 |
 
 调整连接数时，保持 `minimum-idle` 小于或等于 `maximum-pool-size`。
+
+### MyBatis-Plus
+
+业务 Mapper 放在 `com.workbaseai.server` 的子包，标注 `@Mapper` 并继承 `BaseMapper<实体类型>`。通过构造器注入 Mapper 即可调用 `insert`、`selectById` 等方法。Mapper 与启动健康检查共用 `spring.datasource` 配置的 HikariCP 数据源。 [MyBatis-Plus 快速入门](https://baomidou.com/getting-started/)
+
+### 用户接口
+
+首次使用用户接口前，在目标 MySQL 库中执行 `src/main/resources/db/sys_user.sql`，创建完整的 `sys_user` 表。
+
+| 方法 | 路径 | 用途 |
+| --- | --- | --- |
+| `GET` | `/workbase/users/detail?id=1` | 按 ID 查询用户 |
+| `POST` | `/workbase/users/create` | 新增用户 |
+| `PUT` | `/workbase/users/update?id=1` | 修改用户信息 |
+| `DELETE` | `/workbase/users/delete?id=1` | 删除用户 |
+
+新增和修改都需要 `username` 和 `displayName`，`email` 和 `status` 可选。新增用户默认启用，`status` 用 `1` 表示启用、`0` 表示停用。修改时省略可选字段会保留原值，传空字符串可清空邮箱。
+
+新增、修改和删除成功时，响应中的 `data` 为布尔值 `true`。查询详情返回用户对象，其中包含由 MySQL 维护的 `createdAt` 和 `updatedAt`。用户名重复时返回 `409`，指定用户不存在时返回 `404`。
+
+```json
+{
+  "username": "alice",
+  "displayName": "小艾",
+  "email": "alice@example.com",
+  "status": 1
+}
+```
 
 ## 直连 Redis
 

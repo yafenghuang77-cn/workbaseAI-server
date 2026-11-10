@@ -28,3 +28,7 @@ spring:
       password: "admin"
       connect-timeout: 3s
       timeout: 2s
+
+springdoc:
+  api-docs:
+    enabled: true

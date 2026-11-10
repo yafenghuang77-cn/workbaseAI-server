@@ -1,0 +1,12 @@
+CREATE TABLE sys_user (
+    user_id BIGINT NOT NULL AUTO_INCREMENT,
+    username VARCHAR(64) NOT NULL,
+    display_name VARCHAR(100) NOT NULL,
+    email VARCHAR(254) NULL,
+    status TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (user_id),
+    CONSTRAINT uk_sys_user_username UNIQUE (username),
+    CONSTRAINT chk_sys_user_status CHECK (status IN (0, 1))
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4;
